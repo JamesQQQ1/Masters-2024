@@ -36,7 +36,7 @@ To run the model for various scenarios, follow these steps in the specified orde
    - Execute `Raster_Layer.py` to convert ArcGIS raster files to NetCDF format:
 
 3. **Forecast Time Series Data:**
-   - Run `Prophet.py`, which utilizes the Prophet forecasting model for time series predictions:
+   - Run `Prophet.py`, on population data:
 
 4. **Extrapolate Population Data:**
    - Use `extrapo_population.py` to estimate population distribution across geographical regions:
@@ -60,8 +60,5 @@ To run the model for various scenarios, follow these steps in the specified orde
 #### Included Data Files
 
 This repository includes raw data files that were specifically used in my research. These files serve as examples or starting points for users who wish to understand the data format and structure required by the model.
-
-
-By adhering to these guidelines, users can effectively leverage the model for a wide array of research questions, making the most of its capabilities to analyze and interpret wind energy potential, land use impacts, or other environmental and geographical phenomena.
 
 For any queries or further assistance, feel free to open an issue in this repository.
