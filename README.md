@@ -59,6 +59,17 @@ To run the model for various scenarios, follow these steps in the specified orde
 
 #### Included Data Files
 
-This repository includes raw data files that were specifically used in my research. These files serve as examples or starting points for users who wish to understand the data format and structure required by the model.
+## Data Organization for RCP Scenarios
+
+The corresponding data for each RCP scenario can be found in their respective branches. Each branch includes specific run files and output files relevant to that scenario. You can access these branches via the links below:
+
+- [RCP 2.6 Branch](https://github.com/your-username/your-repository/tree/rcp-2.6)
+- [RCP 4.5 Branch](https://github.com/your-username/your-repository/tree/rcp-4.5)
+- [RCP 8.5 Branch](https://github.com/your-username/your-repository/tree/rcp-8.5)
+
+### Universal Files
+
+Any files that are used universally across different scenarios are located in the [main branch](https://github.com/your-username/your-repository/tree/main) of the repository.
+ 
 
 For any queries or further assistance, feel free to open an issue in this repository.
