@@ -8,7 +8,7 @@ except UnicodeDecodeError:
     # If that fails, try 'utf-16' encoding
     df = pd.read_csv('validation.csv', encoding='utf-16')
 except Exception as e:
-    # If it still fails, print the exception and exit
+    # If it fails, print the exception and exit
     print(f"An error occurred: {e}")
     exit()
 
