@@ -2,6 +2,7 @@ import pandas as pd
 from prophet import Prophet
 import matplotlib.pyplot as plt
 
+# LaTeX Font style
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "Helvetica"
@@ -30,7 +31,7 @@ data = {
 # Convert the dictionary into a pandas DataFrame
 df = pd.DataFrame(data)
 
-# Process data for
+# Process data
 df.rename(columns={'Year': 'ds', 'TotalEnergyConsumption': 'y'}, inplace=True)
 df['ds'] = pd.to_datetime(df['ds'], format='%Y')
 
@@ -38,28 +39,27 @@ df['ds'] = pd.to_datetime(df['ds'], format='%Y')
 model = Prophet()
 model.fit(df)
 
-# Forecasting
-# Define the number of periods to forecast
+# Number of periods to forecast
 n_periods = 82
 future = model.make_future_dataframe(periods=n_periods, freq='Y')
 
-# Generate forecast results
+# Forecast results
 forecast = model.predict(future)
 print(forecast)
 
-# Extract specific forecasted values for the years 2020, 2050, 2075, and 2099
+# Forecasted values for the years 2020, 2050, 2075, and 2099
 forecast_2020 = forecast[forecast['ds'] == pd.to_datetime('2020-12-31')]['yhat'].values[0]
 forecast_2050 = forecast[forecast['ds'] == pd.to_datetime('2050-12-31')]['yhat'].values[0]
 forecast_2075 = forecast[forecast['ds'] == pd.to_datetime('2075-12-31')]['yhat'].values[0]
 forecast_2099 = forecast[forecast['ds'] == pd.to_datetime('2099-12-31')]['yhat'].values[0]
 
-# Print the extracted forecasted values
+# Print the values
 print(f"Forecast for 2020: {forecast_2020}")
 print(f"Forecast for 2050: {forecast_2050}")
 print(f"Forecast for 2075: {forecast_2075}")
 print(f"Forecast for 2099: {forecast_2099}")
 
-# Plotting
+# Plot
 plt.figure(figsize=(12,6))
 plt.plot(df['ds'], df['y'], label='Historical') 
 plt.plot(forecast['ds'], forecast['yhat'], label='Forecast', color='red') 
@@ -81,7 +81,7 @@ df = pd.DataFrame(data)
 df['Year'] = pd.to_datetime(df['Year'], format='%Y')
 df.set_index('Year', inplace=True)
 
-# Calculate percentage change relative to the year 2020
+# Percentage change relative to the year 2020
 baseline_2020 = df.loc['2020-01-01', 'Forecasted Demand']
 df['Percentage Change from 2020'] = ((df['Forecasted Demand'] - baseline_2020) / baseline_2020) * 100
 print(df)
