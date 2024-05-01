@@ -9,18 +9,18 @@ import pandas as pd
 from netCDF4 import Dataset
 import rioxarray
 
-# Directory Setup
+# Directories
 base_directory = '/Users/jamesquessy/Developer/Projects/Masters/Data/Raster_Data'
 shape_file_directory = os.path.join(base_directory, 'Raw_Data')
 airport_file_directory = os.path.join(base_directory, 'Raw_Data')
 
-# Check necessary directories exist
+# Check directories exist
 os.makedirs(shape_file_directory, exist_ok=True)
 os.makedirs(airport_file_directory, exist_ok=True)
 
 # NSA Mask Creation
 
-# Rasterising the NSA Shapefile
+# Rasterise NSA Shapefile
 nsa_shapefile_path = os.path.join(shape_file_directory, 'National_Scenic_Areas_-_Scotland.shp')
 shapes = gpd.read_file(nsa_shapefile_path)
 resolution = 0.1 
@@ -31,7 +31,7 @@ transform = from_origin(left, top, resolution, resolution)
 nsa_raster_output_path = os.path.join(shape_file_directory, 'nsa_raster.tif') 
 out_shape = (rows, cols) 
 
-# Define metadata for the output raster file.
+# Define metadata for output raster file.
 out_meta = {
     "driver": "GTiff",
     "height": out_shape[0],
@@ -43,7 +43,7 @@ out_meta = {
     "count": 1
 }
 
-# Rasterising the shapefile
+# Rasterise the shapefile
 with rasterio.open(nsa_raster_output_path, 'w', **out_meta) as out_raster:
     out_raster.write_band(1, rasterize(
         [(geometry, 1) for geometry in shapes.geometry],
@@ -53,7 +53,7 @@ with rasterio.open(nsa_raster_output_path, 'w', **out_meta) as out_raster:
         all_touched=True
     ))
 
-# Converting Raster to NetCDF
+# Convert Raster to NetCDF
 with rasterio.open(nsa_raster_output_path) as src:
     raster_data = src.read(1)
     transform = src.transform
@@ -81,7 +81,7 @@ with rasterio.open(nsa_raster_output_path) as src:
 
 # Speical Protetion Area Mask Creation
 
-# Rasterising the NSA Shapefile
+# Rasterise the SPA Shapefile
 spa_shapefile_path = os.path.join(shape_file_directory, 'Special_Protection_Areas.shp')
 shapes = gpd.read_file(spa_shapefile_path)
 resolution = 0.1  
@@ -104,7 +104,7 @@ out_meta = {
     "count": 1
 }
 
-# Rasterising the shapefile
+# Rasterise the shapefile
 with rasterio.open(nsa_raster_output_path, 'w', **out_meta) as out_raster:
     out_raster.write_band(1, rasterize(
         [(geometry, 1) for geometry in shapes.geometry],
@@ -114,7 +114,7 @@ with rasterio.open(nsa_raster_output_path, 'w', **out_meta) as out_raster:
         all_touched=True
     ))
 
-# Converting Raster to NetCDF for NSA
+# Convert Raster to NetCDF for SPA
 with rasterio.open(nsa_raster_output_path) as src:
     raster_data = src.read(1)
     transform = src.transform
@@ -142,7 +142,7 @@ with rasterio.open(nsa_raster_output_path) as src:
 
 # Airport Mask Creation
 
-# Adjusting Latitudes and Longitudes to Grid Points
+# Adjust Latitudes and Longitudes to Grid Points
 def round_to_grid(value, grid_start, increment):
     increments_from_start = (value - grid_start) / increment
     rounded_increments = round(increments_from_start)
@@ -155,7 +155,7 @@ def adjust_to_grid(csv_filepath):
     df.drop(['latitude_deg', 'longitude_deg'], axis=1, inplace=True)
     return df[['ident', 'name', 'Latitude', 'Longitude']]
 
-# Processing CSV file and creating airport mask
+# Process CSV file and create airport mask
 csv_filepath = os.path.join(airport_file_directory, 'scotland_airports.csv')
 adjusted_df = adjust_to_grid(csv_filepath)
 airports_directory = os.path.join(airport_file_directory)
@@ -164,16 +164,16 @@ adjusted_df.to_excel(os.path.join(airports_directory, 'scotland_airports_grid.xl
 excel_file = os.path.join(airports_directory, 'scotland_airports_grid.xlsx')
 airports_df = pd.read_excel(excel_file)
 
-# Define the grid boundaries and step size for the airport mask
+# Grid boundaries and step size for airport mask
 min_lat, max_lat, step_lat = 22.05, 72.55, 0.1
 min_lon, max_lon, step_lon = -44.5, 64.9, 0.1
 
-# Calculate the size of the grid
+# Size of the grid
 lat_size = int((max_lat - min_lat) / step_lat) + 1
 lon_size = int((max_lon - min_lon) / step_lon) + 1
 airport_array = np.zeros((lat_size, lon_size))
 
-# Creating the airport mask in a new NetCDF file
+# Create airport mask in a new NetCDF file
 airport_array = np.zeros((lat_size, lon_size))
 
 for _, row in airports_df.iterrows():
