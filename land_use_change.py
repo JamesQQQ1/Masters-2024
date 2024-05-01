@@ -3,13 +3,13 @@ import numpy as np
 import time
 from tqdm import tqdm 
 
-# Path to NetCDF files
+# Path to files
 input_file = '/Users/jamesquessy/Desktop/Uni Work/Masters/Reasearch Project/Code/Power_Generation/land_use/land_use_uk_adjusted.nc'
 output_file = '/Users/jamesquessy/Desktop/Uni Work/Masters/Reasearch Project/Code/Power_Generation/land_use/land_use_adjusted.nc'
 
 ds = xr.open_dataset(input_file)
 
-# IPCC classification mapping
+# IPCC classification
 ipcc_classes = {
     1: [10, 11, 12, 20, 30, 40],  # Agriculture
     2: [50, 60, 61, 62, 70, 71, 72, 80, 81, 82, 90, 100, 160, 170],  # Forest
@@ -20,7 +20,7 @@ ipcc_classes = {
     7: [210]  # Water
 }
 
-# Friction coefficient mapping
+# Friction coefficient
 friction_coefficients = {
     1: 0.15,  # Agriculture -> Grasslands
     2: 0.25,  # Forest -> Heavily forested land
