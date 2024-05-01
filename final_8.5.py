@@ -1,6 +1,6 @@
-# Section 1: Imports and Setup
+# Section 1: Import and Setup
 
-# Subsection 1.1: Importing Required Libraries
+# Subsection 1.1: Import libaries
 import geopandas as gpd
 import rasterio
 from rasterio.features import rasterize
@@ -16,27 +16,27 @@ import pandas as pd
 import simplekml
 
 # Subsection 1.2: Directory Setup
-# Define the base directory for the project and subdirectories for various data categories.
+# Base directory and subdirectories
 base_directory = '/Users/jamesquessy/Developer/Projects/Masters'
 population_directory = os.path.join(base_directory, 'Data/Population')
-last_year_avg_directory = os.path.join(base_directory, 'Data/last_year_avg/RCP_8.5')
-merged_directory = os.path.join(base_directory, 'RCP_8.5/Code/Merged_Files')
-final_files_directory = os.path.join(base_directory, 'RCP_8.5/Code/final_files')
+last_year_avg_directory = os.path.join(base_directory, 'Data/last_year_avg/RCP_4.5')
+merged_directory = os.path.join(base_directory, 'RCP_4.5/Code/Merged_Files')
+final_files_directory = os.path.join(base_directory, 'RCP_4.5/Code/final_files')
 raster_file_directory = os.path.join(base_directory, 'Data/Raster_Data/Raw_Data')
 
 
-# Define file paths for orography, land area, and land use data.
+# File paths for orography, land area, and land use data.
 orography_file_path = os.path.join(base_directory, 'Data/Raster_Data/Orogrophy/orography_remap.nc')
 land_area_file_path = os.path.join(base_directory, 'Data/Raster_Data/Land_Area/land_area_remap.nc')
 land_use_file_path = os.path.join(base_directory, 'Data/Raster_Data/land_use/remaped_land.nc')
 
-# Define file paths for raster files.
+# File paths for raster files.
 airport_mask_file_path = os.path.join(raster_file_directory, 'airport_mask.nc')
 spa_mask_file_path = os.path.join(raster_file_directory, 'spa_raster_NetCDF.nc')
 nsa_mask_file_path = os.path.join(raster_file_directory, 'nsa_raster_NetCDF.nc')
 
 # Subsection 1.3: Check and Create Directories
-# Ensure that all the necessary directories exist
+# Check all directories exist
 os.makedirs(population_directory, exist_ok=True)
 os.makedirs(last_year_avg_directory, exist_ok=True)
 os.makedirs(merged_directory, exist_ok=True)
@@ -44,35 +44,34 @@ os.makedirs(final_files_directory, exist_ok=True)
 os.makedirs(raster_file_directory, exist_ok=True)
 
 
-# Subsection 1.4: Define Constants for the Model
-# Define years for analysis and variables for climate data.
+# Subsection 1.4: Constants
+# Years for analysis and variables for climate data
 years = ['2020', '2050', '2075', '2099'] 
 variables = ['hurs', 'ps', 'sfcWind', 'tas']
 
-# Constants related to wind turbine calculations.
-turbine_area = 2000  # Turbine area in square meters.
-power_coefficient = 0.35  # Turbine power coefficient.
-reference_height = 10  # Reference height for wind speed measurement (in meters).
-target_height = 80  # Target height for wind speed estimation (in meters).
+# Constants for wind turbine calculations
+turbine_area = 2000  # Turbine area in square meters
+power_coefficient = 0.35  # Turbine power coefficient
+reference_height = 10  # Reference height for wind speed measurement (in meters)
+target_height = 80  # Target height for wind speed estimation (in meters)
 
-# Physical constants and other parameters for environmental calculations.
+# Physical constants
 Rd = 287.05  # Specific gas constant for dry air (J/kg·K).
 Rv = 461.5  # Specific gas constant for water vapor (J/kg·K).
-Kelvin = 273.15  # Conversion constant from Celsius to Kelvin.
-power_loss_per_1000km = 0.0035  # Fractional power loss per 1000 km.
-days_per_year = 365  # Number of days per year.
+Kelvin = 273.15  # Conversion from Celsius to Kelvin.
+power_loss_per_1000km = 0.0035  # Power loss per 1000 km.
+days_per_year = 365  # Number of days in a non-leap year.
 hours_per_year = 8760  # Number of hours in a non-leap year.
 air_density = 1.225  # Air density at sea level (kg/m³).
 swept_area = 2000  # Area swept by wind turbine blades (m²).
 rated_wind_speed = 14  # Rated wind speed for turbine power calculations (m/s).
 
-# Section 3: Wind Turbine Weather Analysis
-
-# Subsection 3.1: Function Definitions for Various Wind Calculations
+# Section 3: Weather Analysis
+# Subsection 3.1: Wind speed functions
 
 def calculate_wind_at_80m(wind_speed_10m, friction_coefficient, reference_height, target_height):
     """
-    Calculate wind speed at 80 meters using logarithmic wind profile.
+    Calculate wind speed at 80 meters
     
     Parameters:
     - wind_speed_10m: Wind speed measured at 10 meters.
@@ -87,7 +86,7 @@ def calculate_wind_at_80m(wind_speed_10m, friction_coefficient, reference_height
 
 def calculate_saturation_vapor_pressure(t):
     """
-    Calculate saturation vapor pressure based on temperature.
+    Saturation vapor pressure based on temperature.
     
     Parameters:
     - t: Temperature in degrees Celsius.
@@ -148,11 +147,11 @@ def calculate_power_generation(wind_80m, air_density, turbine_area, power_coeffi
     return wind_power / 1000  # Convert to kW
 
 
-# Section 4: Data Processing and Analysis
+# Section 4: Data Processing
 
 def merge_datasets(year, nsa_mask_file_path, airport_mask_file_path, spa_mask_file_path):
     """
-    Merge various climate datasets for a given year and apply a mask from a NetCDF file.
+    Merge climate datasets and apply a mask from a NetCDF file.
 
     Parameters:
     - year: The year for which the datasets are to be merged.
@@ -160,31 +159,25 @@ def merge_datasets(year, nsa_mask_file_path, airport_mask_file_path, spa_mask_fi
 
     Returns:
     - The file path of the merged NetCDF dataset.
-
-    Steps:
-    1. Load necessary datasets (orography, land area, and land use).
-    2. Append additional climate data for the specified year.
-    3. Calculate wind speed at 80m, air density, and power generation.
-    4. Apply the mask from the NetCDF file to the power generation data.
-    5. Save the merged dataset as a NetCDF file.
+    
     """
 
-    # Load necessary datasets
+    # Load datasets
     orography_ds = xr.open_dataset(orography_file_path)
     land_area_ds = xr.open_dataset(land_area_file_path)
     land_use_ds = xr.open_dataset(land_use_file_path)
     datasets = [orography_ds, land_area_ds, land_use_ds]
 
-    # Append additional climate data for the specified year
+    # Append climate data
     for variable in variables:
         file_path = os.path.join(last_year_avg_directory, f"{variable}_{year}_yearly_avg.nc")
         if os.path.exists(file_path):
             ds = xr.open_dataset(file_path)
             if 'height' in ds:
-                ds = ds.drop_vars('height')  # Drop 'height' variable if present
+                ds = ds.drop_vars('height') 
             datasets.append(ds)
 
-    # Merge all datasets and calculate necessary parameters
+    # Merge datasets 
     merged_ds = xr.merge(datasets)
     if 'sfcWind' in merged_ds and 'friction_coefficient' in merged_ds:
         merged_ds['wind_80m'] = calculate_wind_at_80m(
@@ -199,46 +192,47 @@ def merge_datasets(year, nsa_mask_file_path, airport_mask_file_path, spa_mask_fi
             merged_ds['wind_80m'], merged_ds['air_density'], turbine_area, power_coefficient
         )
 
-    # Apply the masks from the NetCDF files
+    # Apply the masks
     mask_ds = xr.open_dataset(nsa_mask_file_path)
     mask_aligned = mask_ds['mask'].reindex_like(merged_ds['power_generation'], method='nearest')
 
     airport_mask_ds = xr.open_dataset(airport_mask_file_path)
     airport_mask_aligned = airport_mask_ds['airport'].reindex_like(merged_ds['power_generation'], method='nearest')
     
-    # Load the Special Protection Area mask dataset
+    # Load the Special Protection Area mask 
     special_mask_ds = xr.open_dataset(spa_mask_file_path)
     special_mask_aligned = special_mask_ds['mask'].reindex_like(merged_ds['power_generation'], method='nearest')
 
-    # Apply NSA, airport, and SPA masks together
+    # Apply NSA, airport, and SPA mask
     merged_ds['power_generation'] = merged_ds['power_generation'].where(
         (mask_aligned == 0) & (airport_mask_aligned == 0) & (special_mask_aligned == 0), 0)
     
-    # Save the merged dataset
+    # Save the dataset
     merged_file_path = os.path.join(merged_directory, f"Merged_{year}.nc")
     merged_ds.to_netcdf(merged_file_path)
     print(f"Merged file for {year} saved at {merged_file_path}")
 
     return merged_file_path
 
-# Section 5: Data Processing and Analysis for Each Year
+# Section 5: Data Processing and Analysis
 
-# Iterate over each specified year for analysis
+# Loop over each year
 for year in years:
-    # Merge datasets for the given year
+    # Merge datasets
     merged_file_path = merge_datasets(year, nsa_mask_file_path, airport_mask_file_path, spa_mask_file_path)
     
-    # Process and drop unnecessary variables
+    # Drop unnecessary variables
     essential_var_file_path = os.path.join(merged_directory, f"essential_var_{year}.nc")
     if os.path.exists(merged_file_path):
         ds = xr.open_dataset(merged_file_path)
-        # Dropping variables that are not needed for further analysis
+        # Variables not essential for further analysis
         ds = ds.drop_vars([
             "air_density", "change_count", 'friction_coefficient', 'hurs',
             'current_pixel_state', 'observation_count', 'orog', 'processed_flag',
             'ps', 'sfcWind', 'sftlf', 'tas', 'time', 'time_bnds', 'wind_80m'
         ])
-        # Save dataset with essential variables only
+        
+        # Save dataset
         if not os.path.exists(essential_var_file_path):
             ds.to_netcdf(essential_var_file_path)
             print(f"Essential variables saved for {year}")
@@ -253,11 +247,9 @@ for year in years:
         dataset = Dataset(essential_var_file_path, 'r+')
         lccs_class = dataset.variables['lccs_class'][:]
         power_generation = dataset.variables['power_generation'][:]
-        # Create masks for urban and water areas
         urban_mask = lccs_class == 5
         water_mask = lccs_class == 2
         exclusion_mask = np.logical_or(urban_mask, water_mask)
-        # Apply mask to power generation data
         power_generation_masked = np.ma.array(power_generation, mask=exclusion_mask)
         dataset.variables['power_generation'][:] = power_generation_masked
         dataset.sync()
@@ -266,7 +258,7 @@ for year in years:
     else:
         print(f"Failed to apply masks for {year}")
 
-    # Replace NaN values and save the final file
+    # Replace NaN values and save
     final_file_path = os.path.join(final_files_directory, f"final_file_{year}.nc")
     if os.path.exists(essential_var_file_path):
         ds = xr.open_dataset(essential_var_file_path)
@@ -282,30 +274,28 @@ for year in years:
     else:
         print(f"Failed to replace NaN values for {year}")
 
-# City-Level Data Analysis
-
-# Calculate theoretical maximum power output at rated wind speed
+# Calculate maximum power output at rated wind speed
 P_rated = 0.5 * air_density * swept_area * power_coefficient * rated_wind_speed**3
 P_rated_kW = P_rated / 1000  # Convert to kilowatts (kW)
-max_annual_output = P_rated_kW * hours_per_year  # Maximal annual output in kWh
+max_annual_output = P_rated_kW * hours_per_year 
 
-# Function to calculate power loss over distance
+# Calculate power loss over distance
 def calculate_power_loss(power, distance):
     """
     Calculate the power loss over a given distance due to transmission losses.
 
     Parameters:
     - power: The initial power in kilowatts (kW).
-    - distance: The distance over which the power is transmitted (in meters).
+    - distance: The distance the power is transmitted (in meters).
 
     Returns:
-    - The power after accounting for the loss over the given distance.
+    - The power after accounting for the loss over the distance.
     """
     distance_km = distance / 1000
     loss_fraction = 1 - (power_loss_per_1000km * (distance_km // 1000))
     return power * loss_fraction
 
-# Process data for each year
+# Process data
 all_years_top_locations = pd.DataFrame()
 all_years_top_locations_no_demand = pd.DataFrame()
 
@@ -313,27 +303,27 @@ for year in years:
     file_path = os.path.join(final_files_directory, f'final_file_{year}.nc')
     dataset = nc.Dataset(file_path)
 
-    # Extracting wind power data
+    # Extract wind power data
     lon = dataset.variables['lon'][:]
     lat = dataset.variables['lat'][:]
     power_generation = dataset.variables['power_generation'][:,:,0].filled(np.nan)
 
-    # Load city energy demand data from CSV file
+    # Load city energy demand data
     energy_demand_df = pd.read_csv(os.path.join(population_directory, f'city_power_demand_projection_{year}.csv'))
 
     # DataFrame to store results
     top_locations = pd.DataFrame()
 
-    # Iterate over each city
+    # Loop over each city
     for index, row in energy_demand_df.iterrows():
         city_name = row['City']
         city_coords = (row['Latitude'], row['Longitude'])
         city_energy_demand_annual = row['Energy Demand (kWh)']
 
-        # List to store all locations with their power generation
+        # Store all locations with power generation
         all_locations = []
 
-        # Iterate over each grid point to find potential locations
+        # Loop over each grid point to find potential locations
         for i in range(len(lat)):
             for j in range(len(lon)):
                 daily_power_generation = power_generation[i, j]
@@ -352,10 +342,10 @@ for year in years:
                     # Add location and its power generation to the list
                     all_locations.append((adjusted_daily_power, wind_farm_coords, distance, annual_energy_production, demand_satisfaction))
 
-        # Sort the locations by power generation and select the top 10
+        # Sort locations by power generation and select top 10
         top_10_locations = sorted(all_locations, key=lambda x: x[0], reverse=True)[:10]
 
-        # Add each of the top 10 locations to the DataFrame
+        # Add to the DataFrame
         for rank, (power, location, distance, annual_production, satisfaction) in enumerate(top_10_locations, 1):
             new_row = {
                 'Year': year,
@@ -372,14 +362,13 @@ for year in years:
             }
             top_locations = pd.concat([top_locations, pd.DataFrame([new_row])], ignore_index=True)
 
-    # Append the results of the current year to the DataFrame
     all_years_top_locations = pd.concat([all_years_top_locations, top_locations], ignore_index=True)
     dataset.close()
     print(f"The analysis for {year} has been completed.")
     
     top_power_locations = []
 
-    # Iterate over each grid point to find the top locations based on power generation
+    # Loop over each grid point to find the top locations based on power generation
     for i in range(len(lat)):
         for j in range(len(lon)):
             daily_power_generation = power_generation[i, j]
@@ -388,15 +377,14 @@ for year in years:
                 annual_energy_production = daily_power_generation * days_per_year * (0.3 * 24) 
                 top_power_locations.append((annual_energy_production, wind_farm_coords))
 
-    # Sort the locations by annual energy production and select the top 10
+    # Sort locations by power generation and select top 10
     top_10_power_locations = sorted(top_power_locations, key=lambda x: x[0], reverse=True)[:10]
 
-    # Iterate and add each of the top 10 locations to the DataFrame
+    # Add to the dataframe
     for rank, (annual_production, location) in enumerate(top_10_power_locations, 1):
-        # Calculating back the daily power generation
         daily_power_generation = annual_production / (days_per_year * 0.3 * 24)
 
-        # Creating a new row with the required information
+        # Create a new row with required information 
         new_row = {
             'Year': year,
             'Rank': rank,
@@ -407,21 +395,21 @@ for year in years:
             'Capacity Factor (%)': (annual_production / max_annual_output) * 100
         }
 
-        # Appending the new row to the DataFrame
+        # Add the new row to the DataFrame
         all_years_top_locations_no_demand = pd.concat([all_years_top_locations_no_demand, pd.DataFrame([new_row])], ignore_index=True)
 
-# Round all values in the DataFrame to one decimal place
+# Round to one decimal place
 all_years_top_locations, all_years_top_locations_no_demand = all_years_top_locations.round(5), all_years_top_locations_no_demand.round(5)
 
-# Save the results to an Excel file
-all_years_top_locations.to_excel(os.path.join(base_directory, "RCP_8.5/Code/RCP_8.5_top_locations.xlsx"), index=False)
-print("All years processed successfully. Results saved to 'RCP_8.5_top_locations.xlsx'")
+# Save to Excel file
+all_years_top_locations.to_excel(os.path.join(base_directory, "RCP_4.5/Code/RCP_4.5_top_locations.xlsx"), index=False)
+print("All years processed successfully. Results saved to 'RCP_4.5_top_locations.xlsx'")
 
-# Save the new DataFrame to a separate Excel file
-all_years_top_locations_no_demand.to_excel(os.path.join(base_directory, "RCP_8.5/Code/RCP_8.5_top_power_locations.xlsx"), index=False)
-print("Results for top power generation locations saved to 'RCP_8.5_top_power_locations.xlsx'")
+# Save new dataframe to a different excel file
+all_years_top_locations_no_demand.to_excel(os.path.join(base_directory, "RCP_4.5/Code/RCP_4.5_top_power_locations.xlsx"), index=False)
+print("Results for top power generation locations saved to 'RCP_4.5_top_power_locations.xlsx'")
 
-# Section 7: Creating KML Files for Google Earth
+# Section 7: Creating KML Files
 
 def create_kml(df, filename):
     kml = simplekml.Kml()
@@ -434,7 +422,7 @@ def create_kml(df, filename):
     kml.save(filename)
 
 # Create and save KML for all_years_top_locations
-create_kml(all_years_top_locations, os.path.join(base_directory, "RCP_8.5/Code/top_locations.kml"))
+create_kml(all_years_top_locations, os.path.join(base_directory, "RCP_4.5/Code/top_locations.kml"))
 
 # Create and save KML for all_years_top_locations_no_demand
-create_kml(all_years_top_locations_no_demand, os.path.join(base_directory, "RCP_8.5/Code/top_power_locations_no_demand.kml"))
+create_kml(all_years_top_locations_no_demand, os.path.join(base_directory, "RCP_4.5/Code/top_power_locations_no_demand.kml"))
