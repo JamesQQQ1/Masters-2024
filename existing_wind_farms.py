@@ -1,8 +1,8 @@
 import pandas as pd
 from pyproj import Proj, transform
 
-# Load the Excel file
-excel_path = '/Users/jamesquessy/Desktop/wind_farm.xlsx'  # Replace with the path to your Excel file
+# Load data
+excel_path = '/Users/jamesquessy/Desktop/wind_farm.xlsx'
 df = pd.read_excel(excel_path)
 
 # Filter the data to only include rows where 'Technology Type' is not 'Wind Onshore'
