@@ -19,7 +19,7 @@ efficiency_improvements = {
     '2099': 0.40   
 }
 
-# Calculating adjusted demand
+# Adjusted demand
 adjusted_demands = {}
 for year, change in forecasted_changes.items():
     forecasted_demand = starting_demand * (1 + (change / 100))
@@ -36,7 +36,7 @@ per_capita_demand = {
     '2099': adjusted_demands  
 }
 
-# Define the total population for the given years. 
+# Total population for 2020, 2050, 2075 and 2099. 
 total_population_years = {
     2020: 67081234,
     2050: 73162612,
@@ -44,7 +44,7 @@ total_population_years = {
     2099: 76015656
 }
 
-# Define the population and coordinates for cities
+# Population and coordinates for cities
 city_data = {
     'London': {'Population': 9304000.00, 'Latitude': 51.5085, 'Longitude': -0.1257},
     'Manchester': {'Population': 2730000.00, 'Latitude': 53.481, 'Longitude': -2.2374},
@@ -77,13 +77,13 @@ city_data = {
 }
 
 
-# Calculate population growth factor from the total population projection
+# Population growth factor
 population_growth_factors = {2020: 1} 
 for year, population in total_population_years.items():
     if year != 2020: 
         population_growth_factors[year] = population / total_population_years[2020]
 
-# Project the population for each city based on the growth factor
+# Population for each city based on the growth factor
 projected_city_data = {}
 for city, data in city_data.items():
     projected_city_data[city] = {}
@@ -105,8 +105,6 @@ for city, data in city_data.items():
 # For each year, create a CSV file with the projected demand for each city.
 for year in population_growth_factors.keys():
     city_energy_demand = []
-
-    # Use the respective per capita demand for each year
     current_per_capita_demand = per_capita_demand[str(year)][str(year)]
 
     for city, data in projected_city_data.items():
@@ -122,10 +120,10 @@ for year in population_growth_factors.keys():
             'Longitude': projected_info['Longitude']
         })
 
-    # Convert the list to a DataFrame.
+    # Convert to a DataFrame.
     energy_demand_df = pd.DataFrame(city_energy_demand)
 
-    # Save the DataFrame to a CSV file.
+    # Save to a CSV file.
     csv_file_name = f'city_power_demand_projection_{year}.csv'
     energy_demand_df.to_csv(csv_file_name, index=False, float_format='%.2f')
 
